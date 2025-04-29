@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12", ]
-        architecture: ["x86_64", "aarch64"]
+        rust-target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
 
     steps:
       # 检出代码
@@ -24,28 +24,26 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # 安装 Rust 工具链
-      - name: Install Rust
+      # 安装 Rust 工具链并设置目标架构
+      - name: Install Rust for ${{ matrix.rust-target }}
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: ${{ matrix.rust-target }}
 
       # 安装 uv
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-      # 安装 cross-compilation tools for aarch64
-      - name: Install cross-compilation tools
-        if: matrix.architecture == 'aarch64'
+      # 使用 uv 和 maturin 构建项目，指定目标架构
+      - name: Build with maturin for ${{ matrix.rust-target }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-
-      # 使用 uv 和 maturin 构建项目
-      - name: Build with maturin
-        run: uv build
+          export RUST_TARGET=${{ matrix.rust-target }}
+          uv build --target $RUST_TARGET
 
       # 可选：将构建产物上传为 artifact
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: python-wheel-${{ matrix.python-version }}
+          name: python-wheel-${{ matrix.python-version }}-${{ matrix.rust-target }}
           path: dist/*.whl
