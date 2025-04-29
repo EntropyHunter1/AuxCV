@@ -15,7 +15,7 @@ fn max(a: f32, b: f32) -> f32 {
 }
 
 #[pymodule]
-fn computing_lib(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn AuxCV(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(preprocess::yolov5::detect::preprocess_fast, m)?)?;
     m.add_function(wrap_pyfunction!(preprocess::yolov5::classify::preprocess_fast, m)?)?;
     m.add_function(wrap_pyfunction!(preprocess::std::float32::preprocess_fast, m)?)?;

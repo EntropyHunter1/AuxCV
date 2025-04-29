@@ -6,9 +6,9 @@ requires = [
 ]
 build-backend = "maturin"
 [project]
-name = "computing_lib"
+name = "AuxCV"
 version = "0.3.6"
-description = "computing_lib"
+description = "AuxCV"
 authors = [{ name = "ywg" }]
 requires-python = ">=3.12"
 dependencies = []

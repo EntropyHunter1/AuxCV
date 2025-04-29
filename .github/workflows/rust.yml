@@ -8,23 +8,10 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            python-version: "3.12"
-            artifact-name: linux-amd64
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
-            python-version: "3.12"
-            artifact-name: linux-aarch64
-            cross: true
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            python-version: "3.12"
-            artifact-name: windows-amd64
+        python-version: ["3.12", "3.13"]
 
     steps:
       # 检出代码
@@ -40,30 +27,21 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      # 安装 maturin
+      # 安装 uv
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      # 使用 uv 安装 maturin 和其他依赖
       - name: Install maturin
-        run: pip install maturin
+        run: uv pip install maturin
 
-      # 安装 cross（仅用于 aarch64 交叉编译）
-      - name: Install cross
-        if: matrix.cross
-        run: |
-          cargo install cross
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-
-      # 构建轮子
+      # 使用 uv 和 maturin 构建项目
       - name: Build with maturin
-        run: |
-          if [ "${{ matrix.cross }}" == "true" ]; then
-            cross run --target ${{ matrix.target }} maturin build --release --out dist --target ${{ matrix.target }}
-          else
-            maturin build --release --out dist --target ${{ matrix.target }}
-          fi
+        run: uv build
 
-      # 安装构建的轮子
-      #- name: Install the package
-      #  run: pip install dist/computing_lib-*.whl
+#      # 使用 uv 安装构建的轮子
+#      - name: Install the package
+#        run: uv pip install dist/computing_lib-*.whl
 
       # 可选：将构建产物上传为 artifact
       - name: Upload artifacts
