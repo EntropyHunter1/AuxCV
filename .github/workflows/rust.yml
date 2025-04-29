@@ -68,7 +68,7 @@ jobs:
       - name: Build with maturin (cross-compile)
         run: |
           export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
-          maturin build --release --target ${{ matrix.rust-target }}
+          python -m maturin build --release --target ${{ matrix.rust-target }}
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
