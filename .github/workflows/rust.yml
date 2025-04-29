@@ -44,13 +44,26 @@ jobs:
       - name: Install maturin
         run: pip install maturin
 
-      # 构建 Rust 项目并生成 Python 轮子
+      # 安装 cross（仅用于 aarch64 交叉编译）
+      - name: Install cross
+        if: matrix.cross
+        run: |
+          cargo install cross
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
+      # 构建轮子
       - name: Build with maturin
-        run: maturin build --release --out dist
+        run: |
+          if [ "${{ matrix.cross }}" == "true" ]; then
+            cross run --target ${{ matrix.target }} maturin build --release --out dist --target ${{ matrix.target }}
+          else
+            maturin build --release --out dist --target ${{ matrix.target }}
+          fi
 
       # 安装构建的轮子
-      - name: Install the package
-        run: pip install dist/computing_lib-*.whl
+      #- name: Install the package
+      #  run: pip install dist/computing_lib-*.whl
 
       # 可选：将构建产物上传为 artifact
       - name: Upload artifacts
