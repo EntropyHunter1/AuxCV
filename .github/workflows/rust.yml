@@ -39,7 +39,7 @@ jobs:
       - name: Build with maturin for ${{ matrix.rust-target }}
         run: |
           export RUST_TARGET=${{ matrix.rust-target }}
-          uv build --target $RUST_TARGET
+          uv build -- --target $RUST_TARGET
 
       # 可选：将构建产物上传为 artifact
       - name: Upload artifacts
