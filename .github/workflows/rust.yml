@@ -12,8 +12,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12", ]
-        rust-target: ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
-
     steps:
       # 检出代码
       - uses: actions/checkout@v4
@@ -22,7 +20,7 @@ jobs:
       - name: Install Rust for ${{ matrix.rust-target }}
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
+          toolchain: nightly
           target: ${{ matrix.rust-target }}
 
       # 安装 uv
@@ -31,11 +29,7 @@ jobs:
 
       # 使用 uv 和 maturin 构建项目，指定目标架构
       - name: Build with maturin for ${{ matrix.rust-target }}
-        run: |
-          export RUST_TARGET=${{ matrix.rust-target }}
-          uv venv
-          uv pip install maturin
-          uv run maturin build --target ${{ matrix.rust-target }}
+        run: uv build
 
       # 可选：将构建产物上传为 artifact
       - name: Upload artifacts
