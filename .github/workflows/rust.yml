@@ -31,10 +31,6 @@ jobs:
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-      # 使用 uv 安装 maturin 和其他依赖
-      - name: Install maturin
-        run: uv pip install maturin
-
       # 使用 uv 和 maturin 构建项目
       - name: Build with maturin
         run: uv build
