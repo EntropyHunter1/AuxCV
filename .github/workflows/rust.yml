@@ -32,10 +32,6 @@ jobs:
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-      # 使用 uv 和 maturin 构建项目
-#      - name: Build with maturin
-#        run: uv build
-
       # 安装 cross-compilation tools for aarch64
       - name: Install cross-compilation tools
         if: matrix.architecture == 'aarch64'
@@ -45,12 +41,7 @@ jobs:
 
       # 使用 uv 和 maturin 构建项目
       - name: Build with maturin
-        run: |
-          if [ "${{ matrix.architecture }}" = "aarch64" ]; then
-            uv build --wheel --target aarch64-unknown-linux-gnu
-          else
-            uv build --wheel
-          fi
+        run: uv build
 
       # 可选：将构建产物上传为 artifact
       - name: Upload artifacts
