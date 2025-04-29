@@ -7,11 +7,13 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  build-for-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12", ]
+        python-version: [ "3.12" ]
+        rust-target: [ "x86_64-unknown-linux-gnu" ]
+
     steps:
       # 检出代码
       - uses: actions/checkout@v4
@@ -20,7 +22,7 @@ jobs:
       - name: Install Rust for ${{ matrix.rust-target }}
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: nightly
+          toolchain: stable
           target: ${{ matrix.rust-target }}
 
       # 安装 uv
@@ -37,3 +39,39 @@ jobs:
         with:
           name: python-wheel-${{ matrix.python-version }}-${{ matrix.rust-target }}
           path: dist/*.whl
+
+  build-aarch64:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.12" ]
+        rust-target: [ "aarch64-unknown-linux-gnu" ]  # ARM64 目标
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Rust and aarch64 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.rust-target }}
+
+      - name: Install cross-compilation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu  # 安装 ARM64 交叉编译工具链
+
+      - name: Build with maturin (cross-compile)
+        run: |
+          export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+          maturin build --release --target ${{ matrix.rust-target }}
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-aarch64-${{ matrix.python-version }}
+          path: target/aarch64-unknown-linux-gnu/release/*.whl
